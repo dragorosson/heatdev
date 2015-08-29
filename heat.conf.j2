@@ -1,0 +1,58 @@
+[DEFAULT]
+# Show more verbose log output (sets INFO log level output)
+verbose = True
+
+# Show debugging output in logs (sets DEBUG log level output)
+debug = True
+
+# Turn off standard error logging
+use_stderr = True
+
+# Log to this file. Make sure the user running heat-api-cfn has
+# permissions to write to this file!
+log_file = /root/{{ dir }}/install/service.log
+
+# Send logs to syslog (/dev/log) instead of to file specified
+# by `log_file`
+use_syslog = False
+
+environment_dir = /root/{{ dir }}/install/environment.d
+policy_file = /root/{{ dir }}/install/policy.json
+plugin_dirs = /root/{{ dir }}/install/plugins/lib/heat
+
+# Facility to use. If unset defaults to LOG_USER.
+# syslog_log_facility = LOG_LOCAL0
+# Address to bind the server to
+bind_host = 0.0.0.0
+
+default_software_config_transport = POLL_TEMP_URL
+default_deployment_signal_transport = TEMP_URL_SIGNAL
+
+# Port the bind the server to
+bind_port = 80
+rpc_backend = heat.openstack.common.rpc.impl_kombu
+region_name_for_services = {{ TARGET_DC }}
+sql_connection = mysql://{{ dir }}:{{ HEAT_DB_PASS }}@localhost/{{ dir }}
+db_backend = heat.db.sqlalchemy.api
+auth_encryption_key = {{ AUTH_ENC_KEY }}
+keystone_backend = heat.engine.plugins.heat_keystoneclient_v2.client.KeystoneClientV2
+
+[oslo_messaging_rabbit]
+rabbit_userid = {{ dir }}
+rabbit_password = {{ RABBIT_PASS }}
+#rabbit_ha_queues = True
+rabbit_virtual_host = {{ dir }}
+
+[paste_deploy]
+api_paste_config = /root/{{ dir }}/install/api-paste.ini
+
+# keystone auth configuration
+[keystone_authtoken]
+identity_uri = https://identity.api.rackspacecloud.com
+auth_version = v2.0
+admin_tenant_name=
+admin_user = {{ KS_ADMIN }}
+admin_password = {{ KS_ADMIN_PASS }}
+
+[revision]
+heat_revision = {{ dir }}

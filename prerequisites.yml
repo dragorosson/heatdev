@@ -1,0 +1,38 @@
+---
+- name: Package Installer
+  connection: local
+  hosts: localhost
+  vars_files:
+    - /root/heatdev/settings.yml
+
+  tasks:
+    - name: Install required packages
+      apt:
+        pkg: "{{ item }}"
+        state: present
+        update_cache: true
+      with_items:
+        - screen
+        - git
+        - mysql-server
+        - rabbitmq-server
+        - libxml2-dev
+        - libxslt1-dev
+        - libffi-dev
+        - libmysqlclient-dev
+        - python-dev
+        - python-pip
+        - python-virtualenv
+        - python-mysqldb
+        - python-launchpadlib
+
+    - name: Set MySQL password
+      mysql_user:
+        name: root
+        password: "{{ MYSQL_PASS }}"
+
+    - name: Create MySQL config for future logins
+      template:
+        src: /root/heatdev/template/mysql_cnf.j2
+        dest: /root/.my.cnf
+        mode: 0600

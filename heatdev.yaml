@@ -1,0 +1,120 @@
+heat_template_version: 2014-10-16
+
+description: Your own personal Heat development environment!
+
+parameters:
+
+  keystone_admin_user:
+    type: string
+    default: orchestration-dev
+    description: admin user to verify auth tokens
+
+  keystone_admin_pass:
+    type: string
+    hidden: true
+    description: admin password to verify auth tokens
+
+  target_datacenter:
+    type: string
+    description: Which datacenter should be used to deploy resources
+    default: IAD
+    constraints:
+    - allowed_values: [ IAD, DFW, ORD, HKG, SYD, LON ]
+
+resources:
+  server_password:
+    type: OS::Heat::RandomString
+
+  mysql_password:
+    type: OS::Heat::RandomString
+
+  heat_mysql_password:
+    type: OS::Heat::RandomString
+
+  rabbit_password:
+    type: OS::Heat::RandomString
+
+  auth_encryption_key:
+    type: OS::Heat::RandomString
+
+  devbox:
+    type: OS::Nova::Server
+    properties:
+      image: Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      flavor:  4GB Standard Instance
+      admin_pass: { get_attr: [ server_password, value ] }
+      name: { get_param: "OS::stack_name" }
+      config_drive: true
+      software_config_transport: POLL_TEMP_URL
+      user_data_format: SOFTWARE_CONFIG
+      user_data: { get_attr: [ bootconfig, config ] }
+      metadata:
+        rax-heat: { get_param: "OS::stack_id" }
+        stack-name: { get_param: "OS::stack_name" }
+
+  bootconfig:
+    type: https://raw.githubusercontent.com/rackerlabs/template-resources/master/bootconfig_all.yaml
+
+  bootstrap_heat:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ansible
+      inputs:
+      - name: AUTH_ENC_KEY
+      - name: HEAT_DB_PASS
+      - name: KS_ADMIN
+      - name: KS_ADMIN_PASS
+      - name: MYSQL_PASS
+      - name: RABBIT_PASS
+      - name: STACK_NAME
+      - name: TARGET_DC
+      config: |
+        ---
+        - name: Bootstrap Heat
+          connection: local
+          hosts: localhost
+          tasks:
+          - name: Pull heatdev repository
+            git:
+              repo: https://github.com/dragorosson/heatdev.git
+              dest: /root/heatdev
+              version: dev
+          - name: Create settings.yml
+            template:
+              src: /root/heatdev/settings.yml.j2
+              dest: /root/heatdev/settings.yml
+          - name: Run Bootstrap
+            command: ansible-playbook -i localhost, /root/heatdev/bootstrap.yml
+
+  deploy_bootstrap:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: TEMP_URL_SIGNAL
+      config: { get_resource: bootstrap_heat }
+      server: { get_resource: devbox }
+      input_values:
+        AUTH_ENC_KEY:  { get_attr: [ auth_encryption_key, value ] }
+        HEAT_DB_PASS:  { get_attr: [ heat_mysql_password, value ] }
+        KS_ADMIN:      { get_param: keystone_admin_user }
+        KS_ADMIN_PASS: { get_param: keystone_admin_pass }
+        MYSQL_PASS:    { get_attr: [ mysql_password, value ] }
+        RABBIT_PASS:   { get_attr: [ rabbit_password, value ] }
+        STACK_NAME:    { get_param: "OS::stack_name" }
+        TARGET_DC:     { get_param: target_datacenter }
+
+outputs:
+  server_password:
+    value: { get_attr: [ server_password, value ] }
+    description: server password
+
+  mysql_password:
+    value: { get_attr: [ mysql_password, value ] }
+    description: mysql password
+
+  rabbit_password:
+    value: { get_attr: [ rabbit_password, value ] }
+    description: rabbit password
+
+  server_ip:
+    value: { get_attr: [ devbox, accessIPv4 ] }
+    description: server ip address

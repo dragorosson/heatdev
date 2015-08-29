@@ -1,0 +1,23 @@
+{
+    "resource_registry": {
+        "AWS::AutoScaling::*":,
+        "AWS::CloudFormation::Stack":,
+        "AWS::EC2::EIP":,
+        "AWS::EC2::EIPAssociation":,
+        "AWS::EC2::InternetGateway":,
+        "AWS::EC2::NetworkInterface":,
+        "AWS::EC2::RouteTable":,
+        "AWS::EC2::SecurityGroup":,
+        "AWS::EC2::Subnet":,
+        "AWS::EC2::SubnetRouteTableAssociation":,
+        "AWS::EC2::VPC":,
+        "AWS::EC2::VPCGatewayAttachment":,
+        "AWS::EC2::Volume":,
+        "AWS::EC2::VolumeAttachment":,
+        "AWS::IAM::*":,
+        "AWS::S3::*":,
+        "OS::Ceilometer::*":,
+        "OS::Glance::*":,
+        "OS::Sahara::*":
+    }
+}

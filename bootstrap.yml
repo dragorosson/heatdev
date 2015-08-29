@@ -1,0 +1,6 @@
+---
+- name: Heat bootstrapper
+  connection: local
+  hosts: localhost
+
+- include: prerequisites.yml

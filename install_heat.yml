@@ -1,0 +1,114 @@
+---
+- name: Heat Installer
+  connection: local
+  hosts: localhost
+  vars_files:
+    - /root/heatdev/settings.yml
+  tasks:
+    - name: Clone repository into ~/{{ dir }}/heat on branch {{ branch }}
+      git:
+        repo: git@github.com:rackerlabs/heat.git
+        dest: /root/{{ dir }}/heat
+        version: "{{ branch }}"
+        accept_hostkey: yes
+
+    - name: Add upstream as remote
+      shell: >
+        cd /root/{{ dir }}/heat && git remote show upstream ||
+        git remote add upstream git@github.com:openstack/heat.git
+
+    - name: Create directories
+      file:
+        path: /root/{{ dir }}/install/{{ item }}
+        state: directory
+        recurse: yes
+      with_items:
+        - plugins
+        - environment.d
+
+    - name: Create heat.conf
+      template:
+        src: /root/heatdev/heat.conf.j2
+        dest: /root/{{ dir }}/install/heat.conf
+
+    - name: Copy configuration files
+      copy:
+        src: /root/heatdev/{{ item }}
+        dest: /root/{{ dir }}/install/{{ item }}
+      with_items:
+        - policy.json
+        - environment.d/resource_registry.json
+        - api-paste.ini
+        - service.log
+
+    - name: Create {{ dir }} database
+      mysql_db:
+        name: "{{ dir }}"
+
+    - name: Create {{ dir }} user
+      mysql_user:
+        name: "{{ dir }}"
+        password: "{{ HEAT_DB_PASS }}"
+        priv: "{{ dir }}.*: ALL"
+
+    - name: Create {{ dir }} RabbitMQ vhost
+      rabbitmq_vhost:
+        name: "{{ dir }}"
+        state: present
+
+    - name: Set up RabbitMQ user
+      rabbitmq_user:
+        user: "{{ dir }}"
+        password: "{{ RABBIT_PASS }}"
+        force: yes
+        vhost: "{{ dir }}"
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+
+    - name: Upgrade version of pip in venv
+      pip:
+        virtualenv: /root/{{ dir }}/venv
+        name: pip
+        extra_args: -U
+
+    - name: Install Heat requirements
+      pip:
+        virtualenv: /root/{{ dir }}/venv
+        requirements: /root/{{ dir }}/heat/{{ item }}
+      with_items:
+        - requirements.txt
+        - test-requirements.txt
+        - local-requirements.txt
+
+    - name: Install Heat
+      pip:
+        virtualenv: /root/{{ dir }}/venv
+        name: /root/{{ dir }}/heat
+
+    - name: Install Rackspace and Docker plugin requirements
+      pip:
+        virtualenv: /root/{{ dir }}/venv
+        requirements: /root/{{ dir }}/heat/contrib/{{ item }}/requirements.txt
+      with_items:
+        - rackspace
+        - heat_docker
+        - rax-heat-ext
+        - cbd_heat_plugin
+
+    - name: Install Rackspace and Docker plugins
+      shell: >
+        cd /root/{{ dir }}/heat/contrib/{{ item }} &&
+        /root/{{ dir }}/venv/bin/python setup.py install
+        --install-data /root/{{ dir }}/install/plugins
+      with_items:
+        - rackspace
+        - heat_docker
+        - rax-heat-ext
+        - cbd_heat_plugin
+
+    - name: Run heat-manage db_sync
+      command: >
+        /root/{{ dir }}/venv/bin/heat-manage
+        --config-file /root/{{ dir }}/install/heat.conf
+        db_sync

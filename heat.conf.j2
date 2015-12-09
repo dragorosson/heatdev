@@ -29,7 +29,7 @@ default_software_config_transport = POLL_TEMP_URL
 default_deployment_signal_transport = TEMP_URL_SIGNAL
 
 # Port the bind the server to
-bind_port = 80
+bind_port = {{ port }}
 rpc_backend = heat.openstack.common.rpc.impl_kombu
 region_name_for_services = {{ TARGET_DC }}
 sql_connection = mysql://{{ dir }}:{{ HEAT_DB_PASS }}@localhost/{{ dir }}

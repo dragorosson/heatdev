@@ -78,7 +78,7 @@ resources:
             git:
               repo: https://github.com/dragorosson/heatdev.git
               dest: /root/heatdev
-              version: dev
+              version: master
           - name: Create settings.yml
             template:
               src: /root/heatdev/settings.yml.j2

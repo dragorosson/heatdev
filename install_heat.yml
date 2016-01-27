@@ -41,6 +41,15 @@
         - api-paste.ini
         - service.log
 
+    - name: Copy helper scripts
+      copy:
+        src: /root/heatdev/{{ item }}
+        dest: /root/{{ dir }}/{{ item }}
+        mode: 0744
+      with_items:
+        - api_starter.sh
+        - engine_starter.sh
+
     - name: Create {{ dir }} database
       mysql_db:
         name: "{{ dir }}"

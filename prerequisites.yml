@@ -27,6 +27,10 @@
         - python-mysqldb
         - python-launchpadlib
 
+        # Fusion
+        - memcached
+        - libmemcached-dev
+
     - name: Set MySQL password
       mysql_user:
         name: root

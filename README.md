@@ -11,6 +11,8 @@ Getting Started
 
 3. Install Heat, specifying what directory to install in:
 
+  **Note:** You must specify an existing branch. The installer will not run heat-build. Instead, create a build using Jenkins.
+
   **Note:** Using a new directory installs fresh, while using an existing directory will be update the install in there.
   ```
   cd ~/heatdev

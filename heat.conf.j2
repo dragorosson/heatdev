@@ -18,7 +18,7 @@ use_syslog = False
 
 environment_dir = /root/{{ dir }}/install/environment.d
 policy_file = /root/{{ dir }}/install/policy.json
-plugin_dirs = /root/{{ dir }}/install/plugins/lib/heat
+plugin_dirs = /root/{{ dir }}/install/plugins/lib/heat,/root/{{ dir }}/venv/lib/python2.7/site-packages/rax_heat_ext/resources
 
 # Facility to use. If unset defaults to LOG_USER.
 # syslog_log_facility = LOG_LOCAL0

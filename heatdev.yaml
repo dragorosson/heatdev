@@ -40,20 +40,16 @@ resources:
   devbox:
     type: OS::Nova::Server
     properties:
-      image: Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)
+      image: Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM) (Orchestration)
       flavor:  4GB Standard Instance
       admin_pass: { get_attr: [ server_password, value ] }
       name: { get_param: "OS::stack_name" }
       config_drive: true
       software_config_transport: POLL_TEMP_URL
       user_data_format: SOFTWARE_CONFIG
-      user_data: { get_attr: [ bootconfig, config ] }
       metadata:
         rax-heat: { get_param: "OS::stack_id" }
         stack-name: { get_param: "OS::stack_name" }
-
-  bootconfig:
-    type: https://raw.githubusercontent.com/rackerlabs/template-resources/master/bootconfig_all.yaml
 
   bootstrap_heat:
     type: OS::Heat::SoftwareConfig

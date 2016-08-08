@@ -39,6 +39,15 @@ region_name = {{ TARGET_DC }}
 [templates]
 metadata_key = rackspace-metadata
 
+[rackspace_catalog]
+container_name = rackspace-templates-staging
+container_region = IAD
+username = {{ TEMPLATE_USER }}
+tenant_id = {{ TEMPLATE_TENANT_ID }}
+password = {{ TEMPLATE_PASS }}
+template_file = .catalog
+metadata_file = rackspace.yaml
+
 [paste_deploy]
 api_paste_config = /root/{{ dir }}/install/api-paste.ini
 

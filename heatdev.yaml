@@ -21,6 +21,33 @@ parameters:
     constraints:
     - allowed_values: [ IAD, DFW, ORD, HKG, SYD, LON ]
 
+  fusion_github_user:
+    type: string
+    description: github user for Fusion
+    default: fusiontesting
+
+  fusion_github_pass:
+    type: string
+    hidden: true
+    description: password for fusion github user
+    default: ''
+
+  fusion_template_user:
+    type: string
+    description: cloud files user for RAX catalog in Fusion
+    default: heatdev.templates
+
+  fusion_template_tenant_id:
+    type: string
+    description: tenant ID for fusion cloud files user
+    default: 836933
+
+  fusion_template_pass:
+    type: string
+    hidden: true
+    description: password for fusion cloud files user
+    default: ''
+
 resources:
   server_password:
     type: OS::Heat::RandomString
@@ -64,6 +91,11 @@ resources:
       - name: RABBIT_PASS
       - name: STACK_NAME
       - name: TARGET_DC
+      - name: GITHUB_USER
+      - name: GITHUB_PASS
+      - name: TEMPLATE_USER
+      - name: TEMPLATE_TENANT_ID
+      - name: TEMPLATE_PASS
       config: |
         ---
         - name: Bootstrap Heat
@@ -97,6 +129,11 @@ resources:
         RABBIT_PASS:   { get_attr: [ rabbit_password, value ] }
         STACK_NAME:    { get_param: "OS::stack_name" }
         TARGET_DC:     { get_param: target_datacenter }
+        GITHUB_USER:   { get_param: fusion_github_user }
+        GITHUB_PASS:   { get_param: fusion_github_pass }
+        TEMPLATE_USER: { get_param: fusion_template_user }
+        TEMPLATE_TENANT_ID: { get_param: fusion_template_tenant_id }
+        TEMPLATE_PASS: { get_param: fusion_template_pass }
 
 outputs:
   server_password:

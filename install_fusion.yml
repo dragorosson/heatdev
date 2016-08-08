@@ -50,7 +50,7 @@
       mysql_user:
         name: "{{ dir }}"
         password: "{{ HEAT_DB_PASS }}"
-        priv: "{{ dir }}.*: ALL"
+        priv: "{{ dir }}.*:ALL"
 
     - name: Upgrade version of pip in venv
       pip:

@@ -79,7 +79,6 @@
     - name: Symlink conf file (workaround for manage.py)
       file:
         state: link
-        recurse: yes
         src: /root/{{ dir }}/install/fusion.conf
         dest: /etc/fusion/fusion.conf
 
@@ -92,6 +91,5 @@
     - name: Unlink conf file (workaround for manage.py)
       file:
         state: absent
-        recurse: yes
         src: /root/{{ dir }}/install/fusion.conf
         dest: /etc/fusion/fusion.conf
